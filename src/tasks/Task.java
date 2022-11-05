@@ -38,7 +38,14 @@ public class Task {
         return description;
     }
 
+    public void setStatus(TaskStatus status) {
+        if (status == null) return;
+
+        this.status = status;
+    }
+
     public TaskStatus getStatus() {
         return status;
     }
+
 }
