@@ -120,7 +120,7 @@ public class TaskManager {
 
         boolean hasSubtasksNew = false;
         boolean hasSubtasksDone = false;
-        boolean hasBeenChangedToInProgress = false;
+        boolean notInProgress = true;
         for (Long subtaskId : epic.getSubtaskIds()) {
             Subtask subtask = subtasks.get(subtaskId);
 
@@ -133,10 +133,10 @@ public class TaskManager {
 
             if (subtask.getStatus() == TaskStatus.IN_PROGRESS || (hasSubtasksNew && hasSubtasksDone)) {
                 epic.setStatus(TaskStatus.IN_PROGRESS);
-                hasBeenChangedToInProgress = true;
+                notInProgress = false;
             }
         }
-        if (hasBeenChangedToInProgress)
+        if (notInProgress)
             epic.setStatus(hasSubtasksNew ? TaskStatus.NEW : TaskStatus.DONE);
     }
 

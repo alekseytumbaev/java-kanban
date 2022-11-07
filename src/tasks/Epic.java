@@ -11,6 +11,17 @@ public class Epic extends Task {
         subtaskIds = new HashSet<>();
     }
 
+    @Override
+    public String toString() {
+        return "Epic{" +
+                "subtaskIds=" + subtaskIds +
+                ", id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                '}';
+    }
+
     public void addSubtaskId(long id) {
         subtaskIds.add(id);
     }
