@@ -3,8 +3,8 @@ package tasks;
 public class Subtask extends Task {
     private long epicId;
 
-    public Subtask(String title, String description, TaskStatus status) {
-        super(title, description, status);
+    public Subtask(String title, String description) {
+        super(title, description);
     }
 
     public long getEpicId() {
