@@ -9,10 +9,14 @@ import java.util.List;
 import java.util.Map;
 
 public class TaskManager {
-    private long nextId = 1;
+    private long nextId;
     private final Map<Long, Task> tasks = new HashMap<>();
     private final Map<Long, Subtask> subtasks = new HashMap<>();
     private final Map<Long, Epic> epics = new HashMap<>();
+    
+    private long getNextId() {
+        return nextId++;
+    }
 
     //********************Tasks*****************************************************************************************
     public List<Task> getAllTasks() {
@@ -26,9 +30,9 @@ public class TaskManager {
     }
 
     public boolean addTask(Task newTask) {
-        if (newTask == null || tasks.containsKey(newTask.getId())) return false;
+        if (newTask == null) return false;
 
-        newTask.setId(nextId++);
+        newTask.setId(getNextId());
         tasks.put(newTask.getId(), newTask);
         return true;
     }
@@ -54,7 +58,7 @@ public class TaskManager {
 
     //********************Subtasks**************************************************************************************
     public List<Subtask> getAllSubtasks() {
-        return new ArrayList<Subtask>(subtasks.values());
+        return new ArrayList<>(subtasks.values());
     }
 
     public Subtask getSubtaskById(long id) {
@@ -64,15 +68,15 @@ public class TaskManager {
     }
 
     public boolean addSubtask(Subtask newSubtask) {
-        if (newSubtask == null || subtasks.containsKey(newSubtask.getId())) return false;
+        if (newSubtask == null) return false;
 
-        newSubtask.setId(nextId++);
+        newSubtask.setId(getNextId());
         subtasks.put(newSubtask.getId(), newSubtask);
         return true;
     }
 
     public boolean updateSubtask(Subtask updatedSubtask) {
-        if (updatedSubtask == null || !subtasks.containsKey(updatedSubtask.getId())) return false;
+        if (updatedSubtask == null) return false;
 
         Subtask prevSubTask = subtasks.get(updatedSubtask.getId());
         updatedSubtask.setEpicId(prevSubTask.getEpicId());
@@ -158,9 +162,9 @@ public class TaskManager {
     }
 
     public boolean addEpic(Epic newEpic) {
-        if (newEpic == null || epics.containsKey(newEpic.getId())) return false;
+        if (newEpic == null) return false;
 
-        newEpic.setId(nextId++);
+        newEpic.setId(getNextId());
         epics.put(newEpic.getId(), newEpic);
         syncEpic(newEpic);
         return true;
