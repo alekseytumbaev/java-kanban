@@ -25,4 +25,22 @@ public class Subtask extends Task {
                 ", status=" + status +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || o.getClass() != this.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Subtask subtask = (Subtask) o;
+
+        return getEpicId() == subtask.getEpicId();
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (int) (getEpicId() ^ (getEpicId() >>> 32));
+        return result;
+    }
 }
