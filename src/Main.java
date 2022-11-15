@@ -2,11 +2,13 @@ import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 import tasks.TaskStatus;
+import tasks_managers.Managers;
+import tasks_managers.TaskManager;
 
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager manager = new TaskManager();
+        TaskManager manager = Managers.getDefault();
 
         System.out.println("****************************Проверка обычных задач***************************************");
         Task task1 = new Task("1 обычная задача", "1 обычное описание");
