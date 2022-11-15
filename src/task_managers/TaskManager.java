@@ -1,4 +1,4 @@
-package tasks_managers;
+package task_managers;
 
 import tasks.Epic;
 import tasks.Subtask;
@@ -7,6 +7,9 @@ import tasks.Task;
 import java.util.List;
 
 public interface TaskManager {
+
+    List<Task> getHistory();
+
     //********************Tasks*****************************************************************************************
     List<Task> getAllTasks();
 

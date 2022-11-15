@@ -2,8 +2,8 @@ import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 import tasks.TaskStatus;
-import tasks_managers.Managers;
-import tasks_managers.TaskManager;
+import task_managers.Managers;
+import task_managers.TaskManager;
 
 public class Main {
 
@@ -18,6 +18,8 @@ public class Main {
         System.out.println("Создана задача: " + manager.getTaskById(task1.getId()));
         manager.addTask(task2);
         System.out.println("Создана задача: " + manager.getTaskById(task2.getId()));
+        System.out.println("История:");
+        System.out.println(manager.getHistory());
 
         Task updatedTask = new Task("1 обновленная обычная задача",
                 "1 обновлено обычное описание");
@@ -25,6 +27,8 @@ public class Main {
         updatedTask.setId(task1.getId());
         manager.updateTask(updatedTask);
         System.out.println("\nОбновлена задача: " + manager.getTaskById(task1.getId()));
+        System.out.println("История:");
+        System.out.println(manager.getHistory());
 
         System.out.println("\nВсе обычные задачи");
         System.out.println(manager.getAllTasks());
@@ -53,6 +57,8 @@ public class Main {
         System.out.println(manager.getEpicById(epic1.getId()));
         System.out.println("Подзадачи 1го эпика:");
         System.out.println(manager.getEpicSubtasks(epic1.getId()));
+        System.out.println("История:");
+        System.out.println(manager.getHistory());
 
         Subtask sub2 = new Subtask("подзадача 2го эпика", "описание 2");
         manager.addSubtask(sub2);
@@ -63,6 +69,8 @@ public class Main {
         System.out.println(manager.getEpicById(epic2.getId()));
         System.out.println("Подзадачи 2го эпика:");
         System.out.println(manager.getEpicSubtasks(epic2.getId()));
+        System.out.println("История:");
+        System.out.println(manager.getHistory());
 
         Subtask updatedSub11 = new Subtask("обновленная подзадача 1 эпика", "описание");
         updatedSub11.setStatus(TaskStatus.IN_PROGRESS);
@@ -73,6 +81,8 @@ public class Main {
         System.out.println(manager.getEpicById(epic1.getId()));
         System.out.println("Подзадачи 1го эпика:");
         System.out.println(manager.getEpicSubtasks(epic1.getId()));
+        System.out.println("История:");
+        System.out.println(manager.getHistory());
 
         Subtask updatedSub2 = new Subtask("обновленная подзадача 2 эпика", "описание");
         updatedSub2.setStatus(TaskStatus.DONE);
@@ -83,6 +93,8 @@ public class Main {
         System.out.println(manager.getEpicById(epic2.getId()));
         System.out.println("Подзадачи 2го эпика:");
         System.out.println(manager.getEpicSubtasks(epic2.getId()));
+        System.out.println("История:");
+        System.out.println(manager.getHistory());
 
         System.out.println("\nУдаление первой подзадачи первого эпика");
         manager.deleteSubtaskById(updatedSub11.getId());
@@ -101,5 +113,7 @@ public class Main {
         System.out.println(manager.getEpicById(epic2.getId()));
         System.out.println("Подзадачи 2го эпика:");
         System.out.println(manager.getEpicSubtasks(epic2.getId()));
+        System.out.println("История:");
+        System.out.println(manager.getHistory());
     }
 }
