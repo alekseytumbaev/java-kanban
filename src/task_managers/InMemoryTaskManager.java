@@ -1,11 +1,10 @@
 package task_managers;
 
+import task_managers.history_managers.HistoryManager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 import tasks.TaskStatus;
-import task_managers.history_managers.HistoryManager;
-import task_managers.history_managers.InMemoryHistoryManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final HistoryManager historyManager = new InMemoryHistoryManager();
+    private final HistoryManager historyManager = Managers.getHistoryDefault();
     private long nextId;
     private final Map<Long, Task> tasks = new HashMap<>();
     private final Map<Long, Subtask> subtasks = new HashMap<>();
