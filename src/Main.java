@@ -36,10 +36,14 @@ public class Main {
         manager.deleteTaskById(task1.getId());
         System.out.println("\nЗадача 1 удалена. Все задачи:");
         System.out.println(manager.getAllTasks());
+        System.out.println("История:");
+        System.out.println(manager.getHistory());
 
         manager.deleteAllTasks();
         System.out.println("\nВсе задачи удалены.Все задачи:");
         System.out.println(manager.getAllTasks());
+        System.out.println("История:");
+        System.out.println(manager.getHistory());
 
 
         System.out.println("\n\n****************************Проверка эпиков**********************************************");
@@ -102,6 +106,8 @@ public class Main {
         System.out.println(manager.getEpicById(epic1.getId()));
         System.out.println("Подзадачи 1го эпика:");
         System.out.println(manager.getEpicSubtasks(epic1.getId()));
+        System.out.println("История:");
+        System.out.println(manager.getHistory());
 
         System.out.println("\nУдаление всех подзадач");
         manager.deleteAllSubtasks();
