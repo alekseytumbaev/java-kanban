@@ -1,5 +1,7 @@
 package tasks;
 
+import constant.TaskStatus;
+
 public class Task {
     protected long id;
     protected String title;

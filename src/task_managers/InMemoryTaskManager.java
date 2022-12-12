@@ -4,7 +4,7 @@ import task_managers.history_managers.HistoryManager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
-import tasks.TaskStatus;
+import constant.TaskStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;

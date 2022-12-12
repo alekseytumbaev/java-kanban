@@ -1,7 +1,7 @@
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
-import tasks.TaskStatus;
+import constant.TaskStatus;
 import task_managers.Managers;
 import task_managers.TaskManager;
 
