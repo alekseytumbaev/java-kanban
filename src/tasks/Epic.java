@@ -11,16 +11,6 @@ public class Epic extends Task {
         subtaskIds = new HashSet<>();
     }
 
-    @Override
-    public String toString() {
-        return "Epic{" +
-                "subtaskIds=" + subtaskIds +
-                ", id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                '}';
-    }
 
     @Override
     public boolean equals(Object o) {

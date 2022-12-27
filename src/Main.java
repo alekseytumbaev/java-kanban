@@ -1,3 +1,4 @@
+import task_managers.FileBackedTasksManager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
@@ -8,6 +9,7 @@ import task_managers.TaskManager;
 public class Main {
 
     public static void main(String[] args) {
+        /*
         TaskManager manager = Managers.getDefault();
 
         System.out.println("****************************Проверка обычных задач***************************************");
@@ -140,6 +142,7 @@ public class Main {
         Subtask subHist3 = new Subtask("подзадача 3", "подзадача 3");
 
         manager.addSubtask(subHist1);
+
         manager.addSubtask(subHist2);
         manager.addSubtask(subHist3);
 
@@ -172,5 +175,16 @@ public class Main {
         manager.deleteEpicById(epicHist2.getId());
         System.out.println("\nИстория после удаления эпика с тремя подзадачами:");
         System.out.println(manager.getHistory());
+
+        */
+
+
+        System.out.println("\n\n###################### Тестирование FileBackedTasksManager ##############################");
+        FileBackedTasksManager fbm = new FileBackedTasksManager();
+        Task ftask1 = new Task("1 обычная задача", "1 обычное описание");
+        Task ftask2 = new Task("2 обычная задача", "2 обычное описание");
+        fbm.addTask(ftask1);
+        fbm.addTask(ftask2);
+        fbm.getTaskById(1);
     }
 }
