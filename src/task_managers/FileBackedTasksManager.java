@@ -1,6 +1,7 @@
 package task_managers;
 
 import exception.ManagerSaveException;
+import task_managers.history_managers.HistoryManager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
@@ -9,26 +10,30 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
+
+    public FileBackedTasksManager() {
+    }
+
+    protected FileBackedTasksManager(HistoryManager historyManager, Map<Long, Task> tasks, Map<Long, Subtask> subtasks, Map<Long, Epic> epics) {
+        super(historyManager, tasks, subtasks, epics);
+    }
+
     public void save() {
         StringBuilder sb = new StringBuilder();
         String ls = System.lineSeparator();
-        sb.append("id,type,name,status,description,epic").append(ls);
+        sb.append("id,type,title,status,description,epic").append(ls);
 
         for (Task task : super.getAllTasks()) {
-            sb.append(taskToString(task)).append(",").append(ls);
+            sb.append(taskToString(task)).append(ls);
         }
         for (Epic epic : super.getAllEpics()) {
-            sb.append(taskToString(epic)).append(",").append(ls);
+            sb.append(taskToString(epic)).append(ls);
         }
         for (Subtask subtask : super.getAllSubtasks()) {
-            sb.append(taskToString(subtask)).append(",").append(ls);
-        }
-        //удаляем запятую
-        if (!super.getAllTasks().isEmpty() || !super.getAllEpics().isEmpty() || !super.getAllSubtasks().isEmpty()) {
-            int l = sb.length();
-            sb.replace(l - 2, l - 1, "");
+            sb.append(taskToString(subtask)).append(ls);
         }
         sb.append(ls);
         sb.append(historyToString());
@@ -45,12 +50,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         if (task == null) throw new NullPointerException();
 
         String rez = task.getId() +
-                "," + getClass().getSimpleName() +
+                "," + task.getClass().getSimpleName().toUpperCase() +
                 "," + task.getTitle() + "," + task.getStatus() +
                 "," + task.getDescription();
 
         if (task instanceof Subtask)
-            rez += ((Subtask) task).getEpicId();
+            rez += "," + ((Subtask) task).getEpicId();
 
         return rez;
     }
@@ -61,7 +66,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         for (Task task : history) {
             sb.append(task.getId()).append(",");
         }
-        //удаляем запятую
+        //удаляем последнюю запятую
         if (!history.isEmpty()) {
             int l = sb.length();
             sb.replace(l - 1, l, "");

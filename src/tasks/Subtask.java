@@ -1,5 +1,7 @@
 package tasks;
 
+import constant.TaskStatus;
+
 public class Subtask extends Task {
     private long epicId;
 
@@ -12,6 +14,11 @@ public class Subtask extends Task {
     }
 
     public void setEpicId(long epicId) {
+        this.epicId = epicId;
+    }
+
+    public Subtask(long id, String title, String description, TaskStatus status, long epicId) {
+        super(id, title, description, status);
         this.epicId = epicId;
     }
 

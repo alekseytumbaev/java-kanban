@@ -6,6 +6,8 @@ import constant.TaskStatus;
 import task_managers.Managers;
 import task_managers.TaskManager;
 
+import java.io.File;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -181,10 +183,26 @@ public class Main {
 
         System.out.println("\n\n###################### Тестирование FileBackedTasksManager ##############################");
         FileBackedTasksManager fbm = new FileBackedTasksManager();
-        Task ftask1 = new Task("1 обычная задача", "1 обычное описание");
-        Task ftask2 = new Task("2 обычная задача", "2 обычное описание");
-        fbm.addTask(ftask1);
-        fbm.addTask(ftask2);
-        fbm.getTaskById(1);
+        Subtask fsub1 = new Subtask("подзача 1", "описание подзадачи 1");
+        Subtask fsub2 = new Subtask("подзача 2", "описание подзадачи 2");
+        fbm.addSubtask(fsub1);
+        fbm.addSubtask(fsub2);
+
+        Epic fepic = new Epic("эпик", "описание эпика");
+        fepic.addSubtaskId(fsub1.getId());
+        fepic.addSubtaskId(fsub2.getId());
+        fbm.addEpic(fepic);
+
+        fbm.getSubtaskById(fsub1.getId());
+        fbm.getEpicById(fepic.getId());
+
+        FileBackedTasksManager fbm2 = Managers.loadFromFile(new File("tasks.csv"));
+        System.out.println("\nИстория загруженного из файла менеджера");
+        System.out.println(fbm2.getHistory());
+
+        System.out.println("\nЗадачи загруженного из файла менеджера");
+        System.out.println(fbm2.getEpicById(fepic.getId()));
+        System.out.println(fbm2.getSubtaskById(fsub1.getId()));
+        System.out.println(fbm2.getSubtaskById(fsub1.getId()));
     }
 }

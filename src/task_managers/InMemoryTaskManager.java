@@ -12,11 +12,27 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final HistoryManager historyManager = Managers.getHistoryDefault();
+    private final HistoryManager historyManager;
     private long nextId;
-    private final Map<Long, Task> tasks = new HashMap<>();
-    private final Map<Long, Subtask> subtasks = new HashMap<>();
-    private final Map<Long, Epic> epics = new HashMap<>();
+    private final Map<Long, Task> tasks;
+    private final Map<Long, Subtask> subtasks;
+    private final Map<Long, Epic> epics;
+
+    public InMemoryTaskManager() {
+        this.historyManager = Managers.getHistoryDefault();;
+        this.tasks = new HashMap<>();
+        this.subtasks = new HashMap<>();
+        this.epics = new HashMap<>();
+    }
+
+    protected InMemoryTaskManager(HistoryManager historyManager,
+                               Map<Long, Task> tasks, Map<Long, Subtask> subtasks,
+                               Map<Long, Epic> epics) {
+        this.historyManager = historyManager;
+        this.tasks = tasks;
+        this.subtasks = subtasks;
+        this.epics = epics;
+    }
 
     private long getNextId() {
         return nextId++;

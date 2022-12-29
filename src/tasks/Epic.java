@@ -1,5 +1,7 @@
 package tasks;
 
+import constant.TaskStatus;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +13,10 @@ public class Epic extends Task {
         subtaskIds = new HashSet<>();
     }
 
+    public Epic(long id, String title, String description, TaskStatus status) {
+        super(id, title, description, status);
+        this.subtaskIds = new HashSet<>();
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -28,6 +34,17 @@ public class Epic extends Task {
         int result = super.hashCode();
         result = 31 * result + getSubtaskIds().hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Epic{" +
+                "subtaskIds=" + subtaskIds +
+                ", id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                '}';
     }
 
     public void addSubtaskId(long id) {
