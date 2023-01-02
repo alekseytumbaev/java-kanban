@@ -7,12 +7,39 @@ import tasks.Subtask;
 import tasks.Task;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
+
+    public static void main(String[] args) {
+        System.out.println("\n\n###################### Тестирование FileBackedTasksManager ##############################");
+        FileBackedTasksManager fbm = new FileBackedTasksManager();
+        Subtask fsub1 = new Subtask("подзача 1", "описание подзадачи 1");
+        Subtask fsub2 = new Subtask("подзача 2", "описание подзадачи 2");
+        fbm.addSubtask(fsub1);
+        fbm.addSubtask(fsub2);
+
+        Epic fepic = new Epic("эпик", "описание эпика");
+        fepic.addSubtaskId(fsub1.getId());
+        fepic.addSubtaskId(fsub2.getId());
+        fbm.addEpic(fepic);
+
+        fbm.getSubtaskById(fsub1.getId());
+        fbm.getEpicById(fepic.getId());
+
+        FileBackedTasksManager fbm2 = Managers.loadFromFile(new File("tasks.csv"));
+        System.out.println("\nИстория загруженного из файла менеджера");
+        System.out.println(fbm2.getHistory());
+
+        System.out.println("\nЗадачи загруженного из файла менеджера");
+        System.out.println(fbm2.getEpicById(fepic.getId()));
+        System.out.println(fbm2.getSubtaskById(fsub1.getId()));
+        System.out.println(fbm2.getSubtaskById(fsub1.getId()));
+    }
 
     public FileBackedTasksManager() {
     }
@@ -49,13 +76,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private String taskToString(Task task) {
         if (task == null) throw new NullPointerException();
 
-        String rez = task.getId() +
-                "," + task.getClass().getSimpleName().toUpperCase() +
-                "," + task.getTitle() + "," + task.getStatus() +
-                "," + task.getDescription();
+        String rez = String.format("%d,%s,%s,%s,%s",
+                task.getId(),
+                task.getClass().getSimpleName().toUpperCase(),
+                task.getTitle(),
+                task.getStatus(),
+                task.getDescription());
 
         if (task instanceof Subtask)
-            rez += "," + ((Subtask) task).getEpicId();
+            rez += String.format(",%d", ((Subtask) task).getEpicId());
 
         return rez;
     }
@@ -76,7 +105,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     @Override
     public List<Task> getHistory() {
-        List<Task> tasks =  super.getHistory();
+        List<Task> tasks = super.getHistory();
         save();
         return tasks;
     }
