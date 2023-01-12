@@ -19,7 +19,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Long, Epic> epics;
 
     public InMemoryTaskManager() {
-        this.historyManager = Managers.getHistoryDefault();;
+        this.historyManager = Managers.getHistoryDefault();
         this.tasks = new HashMap<>();
         this.subtasks = new HashMap<>();
         this.epics = new HashMap<>();
@@ -83,10 +83,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllTasks() {
-        for (Long taskId : tasks.keySet()) {
-            deleteTaskById(taskId);
+        for (Long taskId : tasks.keySet())
             historyManager.remove(taskId);
-        }
+
+        tasks.clear();
     }
     //******************************************************************************************************************
 
@@ -187,10 +187,12 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setStatus(hasSubtasksNew ? TaskStatus.NEW : TaskStatus.DONE);
     }
 
+    @Override
     public List<Epic> getAllEpics() {
         return new ArrayList<>(epics.values());
     }
 
+    @Override
     public Epic getEpicById(long id) {
         if (!epics.containsKey(id)) return null;
 

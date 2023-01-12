@@ -7,44 +7,17 @@ import tasks.Subtask;
 import tasks.Task;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public class FileBackedTasksManager extends InMemoryTaskManager {
+public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    public static void main(String[] args) {
-        System.out.println("\n\n###################### Тестирование FileBackedTasksManager ##############################");
-        FileBackedTasksManager fbm = new FileBackedTasksManager();
-        Subtask fsub1 = new Subtask("подзача 1", "описание подзадачи 1");
-        Subtask fsub2 = new Subtask("подзача 2", "описание подзадачи 2");
-        fbm.addSubtask(fsub1);
-        fbm.addSubtask(fsub2);
-
-        Epic fepic = new Epic("эпик", "описание эпика");
-        fepic.addSubtaskId(fsub1.getId());
-        fepic.addSubtaskId(fsub2.getId());
-        fbm.addEpic(fepic);
-
-        fbm.getSubtaskById(fsub1.getId());
-        fbm.getEpicById(fepic.getId());
-
-        FileBackedTasksManager fbm2 = Managers.loadFromFile(new File("tasks.csv"));
-        System.out.println("\nИстория загруженного из файла менеджера");
-        System.out.println(fbm2.getHistory());
-
-        System.out.println("\nЗадачи загруженного из файла менеджера");
-        System.out.println(fbm2.getEpicById(fepic.getId()));
-        System.out.println(fbm2.getSubtaskById(fsub1.getId()));
-        System.out.println(fbm2.getSubtaskById(fsub1.getId()));
+    public FileBackedTaskManager() {
     }
 
-    public FileBackedTasksManager() {
-    }
-
-    protected FileBackedTasksManager(HistoryManager historyManager, Map<Long, Task> tasks, Map<Long, Subtask> subtasks, Map<Long, Epic> epics) {
+    protected FileBackedTaskManager(HistoryManager historyManager, Map<Long, Task> tasks, Map<Long, Subtask> subtasks, Map<Long, Epic> epics) {
         super(historyManager, tasks, subtasks, epics);
     }
 

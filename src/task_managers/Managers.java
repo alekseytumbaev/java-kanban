@@ -23,15 +23,15 @@ public class Managers {
         return new InMemoryHistoryManager();
     }
 
-    public static FileBackedTasksManager loadFromFile(File file) {
+    public static FileBackedTaskManager loadFromFile(File file) {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String taskStr = br.readLine(); //пропускаем строку с заголовкаами
+            br.readLine(); //пропускаем строку с заголовками
 
             Map<Long, Task> tasks = new HashMap<>();
             Map<Long, Epic> epics = new HashMap<>();
             Map<Long, Subtask> subtasks = new HashMap<>();
 
-            taskStr = br.readLine();
+            String taskStr =  br.readLine();
             while (!taskStr.isEmpty()) {
                 Task task = fromString(taskStr);
                 if (task instanceof Epic) {
@@ -67,7 +67,7 @@ public class Managers {
                 historyManager.add(task);
             }
 
-            return new FileBackedTasksManager(historyManager,tasks,subtasks,epics);
+            return new FileBackedTaskManager(historyManager,tasks,subtasks,epics);
         } catch (IOException e) {
             throw new ManagerLoadException("Не удалось прочитать файл");
         }
@@ -96,6 +96,8 @@ public class Managers {
     }
 
     private static List<Long> historyFromString(String value) {
+        if (value == null) return new ArrayList<>();
+
         String[] split = value.split(",");
         List<Long> history = new ArrayList<>();
         for (String s : split) {
