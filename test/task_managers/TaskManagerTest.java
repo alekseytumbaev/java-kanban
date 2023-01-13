@@ -1,6 +1,7 @@
 package task_managers;
 
 import constant.TaskStatus;
+import exception.TasksWithSameStartTimeException;
 import org.junit.jupiter.api.Test;
 import tasks.Epic;
 import tasks.Subtask;
@@ -71,6 +72,26 @@ abstract class TaskManagerTest {
         taskManager.deleteAllTasks();
         assertNull(taskManager.getTaskById(task2.getId()), "Не все задачи удалились");
         assertNull(taskManager.getTaskById(task3.getId()), "Не все задачи удалились");
+    }
+
+
+    @Test
+    void getPrioritizedTask() {
+        Instant now = Instant.now();
+        Task task = new Task("task", "task", now, 1);
+        Subtask subtask = new Subtask("sub", "sub", now, 1);
+        taskManager.addTask(task);
+        assertThrows(
+                TasksWithSameStartTimeException.class,
+                () -> taskManager.addSubtask(subtask),
+                "Не выбрасывается исключение при одинаковом времени начала");
+
+        subtask.setStartTime(Instant.now());
+        assertTrue(taskManager.addSubtask(subtask), "Подзадача не добавляется после изменения времени");
+
+        List<Task> priorTasks = taskManager.getPrioritizedTasks();
+        assertNotNull(priorTasks, "Список с приоритетами не возвращается");
+        assertEquals(priorTasks, List.of(task, subtask), "Неверный приоритет в списке");
     }
     //******************************************************************************************************************
 
@@ -211,15 +232,15 @@ abstract class TaskManagerTest {
         assertNull(taskManager.getSubtaskById(subtask.getId()), "Подзадача эпика не удаляется");
 
         Subtask subtask1 = new Subtask("Test subtask1 for epic1", "Test subtask1 for epic1 description", Instant.now(), 1);
-        taskManager.addSubtask(subtask);
+        taskManager.addSubtask(subtask1);
         Epic epic1 = new Epic("Test epic1", "Test epic1");
-        epic1.addSubtaskId(subtask.getId());
+        epic1.addSubtaskId(subtask1.getId());
         taskManager.addEpic(epic1);
 
         Subtask subtask2 = new Subtask("Test subtask2 for epic2", "Test subtask2 for epic2 description", Instant.now(), 1);
-        taskManager.addSubtask(subtask);
+        taskManager.addSubtask(subtask2);
         Epic epic2 = new Epic("Test epic2", "Test epic2");
-        epic2.addSubtaskId(subtask.getId());
+        epic2.addSubtaskId(subtask2.getId());
         taskManager.addEpic(epic2);
 
         taskManager.deleteAllEpics();
