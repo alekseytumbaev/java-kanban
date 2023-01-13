@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasks.Task;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,7 +20,7 @@ class HistoryManagerTest {
 
     @Test
     void addOneTask() {
-        Task task = new Task(0,"название", "описание", TaskStatus.NEW);
+        Task task = new Task(0,"название", "описание", TaskStatus.NEW, Instant.now(), 1);
         historyManager.add(task);
 
         List<Task> history = historyManager.getHistory();
@@ -30,7 +31,7 @@ class HistoryManagerTest {
 
     @Test
     void addDuplicatedTasks() {
-        Task task = new Task(0,"название", "описание", TaskStatus.NEW);
+        Task task = new Task(0,"название", "описание", TaskStatus.NEW, Instant.now(), 1);
         historyManager.add(task);
         historyManager.add(task);
 
@@ -50,9 +51,9 @@ class HistoryManagerTest {
 
     @Test
     void removeFromEnd() {
-        Task task = new Task(0,"название", "описание", TaskStatus.NEW);
-        Task task1 = new Task(1,"название1", "описание", TaskStatus.NEW);
-        Task task2 = new Task(2,"название2", "описание", TaskStatus.NEW);
+        Task task = new Task(0,"название", "описание", TaskStatus.NEW, Instant.now(), 1);
+        Task task1 = new Task(1,"название1", "описание", TaskStatus.NEW, Instant.now(), 1);
+        Task task2 = new Task(2,"название2", "описание", TaskStatus.NEW, Instant.now(), 1);
         historyManager.add(task);
         historyManager.add(task1);
         historyManager.add(task2);
@@ -64,9 +65,9 @@ class HistoryManagerTest {
 
     @Test
     void removeFromMiddle() {
-        Task task = new Task(0,"название", "описание", TaskStatus.NEW);
-        Task task1 = new Task(1,"название1", "описание", TaskStatus.NEW);
-        Task task2 = new Task(2,"название2", "описание", TaskStatus.NEW);
+        Task task = new Task(0,"название", "описание", TaskStatus.NEW, Instant.now(), 1);
+        Task task1 = new Task(1,"название1", "описание", TaskStatus.NEW, Instant.now(), 1);
+        Task task2 = new Task(2,"название2", "описание", TaskStatus.NEW, Instant.now(), 1);
         historyManager.add(task);
         historyManager.add(task1);
         historyManager.add(task2);
@@ -78,9 +79,9 @@ class HistoryManagerTest {
 
     @Test
     void removeFromBeginning() {
-        Task task = new Task(0,"название", "описание", TaskStatus.NEW);
-        Task task1 = new Task(1,"название1", "описание", TaskStatus.NEW);
-        Task task2 = new Task(2,"название2", "описание", TaskStatus.NEW);
+        Task task = new Task(0,"название", "описание", TaskStatus.NEW, Instant.now(), 1);
+        Task task1 = new Task(1,"название1", "описание", TaskStatus.NEW, Instant.now(), 1);
+        Task task2 = new Task(2,"название2", "описание", TaskStatus.NEW, Instant.now(), 1);
         historyManager.add(task);
         historyManager.add(task1);
         historyManager.add(task2);

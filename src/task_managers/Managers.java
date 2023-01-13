@@ -9,6 +9,7 @@ import tasks.Subtask;
 import tasks.Task;
 
 import java.io.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,7 @@ public class Managers {
                 taskStr = br.readLine();
             }
 
-            //добавляем id подзадач в соответсвующие эпики
+            //добавляем id подзадач в соответсвующее эпики
             for (Subtask sub : subtasks.values()) {
                 Epic epic = epics.get(sub.getEpicId());
                 epic.addSubtaskId(sub.getId());
@@ -62,7 +63,7 @@ public class Managers {
                 } else if (subtasks.containsKey(id)) {
                     task = subtasks.get(id);
                 } else {
-                    throw new ManagerLoadException("Повтрояющиеся Id в файле");
+                    throw new ManagerLoadException("Повторяющиеся Id в файле");
                 }
                 historyManager.add(task);
             }
@@ -81,16 +82,18 @@ public class Managers {
         String title = split[2];
         TaskStatus status = TaskStatus.valueOf(split[3]);
         String description = split[4];
-        long epic;
+        Instant startTime = split[5].equals("null") ? null : Instant.parse(split[5]);
+        int duration  = Integer.parseInt(split[6]);
 
         Task task;
         if (type.equals(Subtask.class.getSimpleName().toUpperCase())) {
-            epic = Long.parseLong(split[5]);
-            task = new Subtask(id, title, description, status, epic);
+            long epic = Long.parseLong(split[7]);
+            task = new Subtask(id, title, description, status, epic, startTime, duration);
         } else if (type.equals(Epic.class.getSimpleName().toUpperCase())) {
-            task = new Epic(id, title, description, status);
+            Instant endTime = split[7].equals("null") ? null : Instant.parse(split[7]);
+            task = new Epic(id, title, description, status, startTime, duration, endTime);
         } else {
-            task = new Task(id, title, description, status);
+            task = new Task(id, title, description, status, startTime, duration);
         }
         return task;
     }

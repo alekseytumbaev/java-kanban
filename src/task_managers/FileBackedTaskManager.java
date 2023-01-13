@@ -49,15 +49,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private String taskToString(Task task) {
         if (task == null) throw new NullPointerException();
 
-        String rez = String.format("%d,%s,%s,%s,%s",
+        String rez = String.format("%d,%s,%s,%s,%s,%s,%d",
                 task.getId(),
                 task.getClass().getSimpleName().toUpperCase(),
                 task.getTitle(),
                 task.getStatus(),
-                task.getDescription());
+                task.getDescription(),
+                task.getStartTime() == null ? "null" : task.getStartTime(),
+                task.getDuration());
 
         if (task instanceof Subtask)
             rez += String.format(",%d", ((Subtask) task).getEpicId());
+        if (task instanceof Epic) {
+            rez += String.format(",%s", task.getEndTime() == null ? "null" : task.getEndTime());
+        }
 
         return rez;
     }

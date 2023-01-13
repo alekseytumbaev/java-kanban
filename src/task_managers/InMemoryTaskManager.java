@@ -6,6 +6,7 @@ import tasks.Subtask;
 import tasks.Task;
 import constant.TaskStatus;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,8 +27,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     protected InMemoryTaskManager(HistoryManager historyManager,
-                               Map<Long, Task> tasks, Map<Long, Subtask> subtasks,
-                               Map<Long, Epic> epics) {
+                                  Map<Long, Task> tasks, Map<Long, Subtask> subtasks,
+                                  Map<Long, Epic> epics) {
         this.historyManager = historyManager;
         this.tasks = tasks;
         this.subtasks = subtasks;
@@ -162,6 +163,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) return;
         if (epic.getSubtaskIds().size() == 0) {
             epic.setStatus(TaskStatus.NEW);
+            epic.setStartTime(null);
+            epic.setDuration(0);
+            epic.setEndTime(null);
             return;
         }
 
@@ -172,6 +176,13 @@ public class InMemoryTaskManager implements TaskManager {
             Subtask subtask = subtasks.get(subtaskId);
 
             subtask.setEpicId(epic.getId());
+
+            Instant epicStart = epic.getStartTime();
+            Instant subtaskStart = subtask.getStartTime();
+            if (epicStart == null || epicStart.isAfter(subtaskStart)) {
+                epic.setStartTime(subtask.getStartTime());
+            }
+            epic.setDuration(epic.getDuration() + subtask.getDuration());
 
             if (subtask.getStatus() == TaskStatus.NEW)
                 hasSubtasksNew = true;
@@ -185,6 +196,9 @@ public class InMemoryTaskManager implements TaskManager {
         }
         if (notInProgress)
             epic.setStatus(hasSubtasksNew ? TaskStatus.NEW : TaskStatus.DONE);
+
+        Instant epicEndTime = epic.getStartTime().plusSeconds(epic.getDuration() * 60L);
+        epic.setEndTime(epicEndTime);
     }
 
     @Override

@@ -2,19 +2,23 @@ package tasks;
 
 import constant.TaskStatus;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Epic extends Task {
     private final Set<Long> subtaskIds;
+    private Instant endTime;
 
     public Epic(String title, String description) {
-        super(title, description);
+        super(title, description, null, 0);
         subtaskIds = new HashSet<>();
     }
 
-    public Epic(long id, String title, String description, TaskStatus status) {
-        super(id, title, description, status);
+    public Epic(long id, String title, String description, TaskStatus status,
+                Instant startTime, int duration, Instant endTime) {
+        super(id, title, description, status, startTime, duration);
+        this.endTime = endTime;
         this.subtaskIds = new HashSet<>();
     }
 
@@ -44,6 +48,9 @@ public class Epic extends Task {
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
+                ", startTime=" + startTime +
+                ", duration=" + duration +
+                ", endTime=" + endTime +
                 '}';
     }
 
@@ -53,5 +60,14 @@ public class Epic extends Task {
 
     public Set<Long> getSubtaskIds() {
         return subtaskIds;
+    }
+
+    @Override
+    public Instant getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Instant endTime) {
+        this.endTime = endTime;
     }
 }

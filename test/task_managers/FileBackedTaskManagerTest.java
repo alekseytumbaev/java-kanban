@@ -6,6 +6,7 @@ import tasks.Epic;
 import tasks.Subtask;
 
 import java.io.File;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -49,8 +50,8 @@ class FileBackedTaskManagerTest extends TaskManagerTest {
 
     @Test
     void testSavingAndLoading() {
-        Subtask fsub1 = new Subtask("подзача 1", "описание подзадачи 1");
-        Subtask fsub2 = new Subtask("подзача 2", "описание подзадачи 2");
+        Subtask fsub1 = new Subtask("подзача 1", "описание подзадачи 1", Instant.now(), 1);
+        Subtask fsub2 = new Subtask("подзача 2", "описание подзадачи 2", Instant.now(), 1);
         taskManager.addSubtask(fsub1);
         taskManager.addSubtask(fsub2);
 
