@@ -103,7 +103,8 @@ public class Managers {
 
         String[] split = value.split(",");
         List<Long> history = new ArrayList<>();
-        for (String s : split) {
+        for (int i = split.length-1; i >= 0; i--) {
+            String s = split[i];
             history.add(Long.valueOf(s));
         }
         return history;

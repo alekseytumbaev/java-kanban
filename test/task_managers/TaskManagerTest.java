@@ -2,6 +2,7 @@ package task_managers;
 
 import constant.TaskStatus;
 import exception.TasksWithSameStartTimeException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import tasks.Epic;
 import tasks.Subtask;
@@ -15,11 +16,17 @@ import static org.junit.jupiter.api.Assertions.*;
 abstract class TaskManagerTest {
 
     TaskManager taskManager;
+    static Instant now;
+
+    @BeforeAll
+    static void beforeAll() {
+        now = Instant.now();
+    }
 
     //********************Tasks*****************************************************************************************
     @Test
     void addTask() {
-        Task task = new Task("Test addNewTask", "Test addNewTask description", Instant.now(), 1);
+        Task task = new Task("Test addNewTask", "Test addNewTask description", now, 1);
         taskManager.addTask(task);
 
         Task savedTask = taskManager.getTaskById(task.getId());
@@ -34,7 +41,7 @@ abstract class TaskManagerTest {
 
     @Test
     void updateTask() {
-        Task task = new Task("Test updateTask", "Test updateTask description", Instant.now(), 1);
+        Task task = new Task("Test updateTask", "Test updateTask description", now, 1);
         taskManager.addTask(task);
 
         Task updatedTask = new Task(
@@ -58,14 +65,16 @@ abstract class TaskManagerTest {
 
     @Test
     void deleteTask() {
-        Task task1 = new Task("Test delete task", "Test delete task description", Instant.now(), 1);
+        Task task1 = new Task("Test delete task", "Test delete task description", now, 1);
         taskManager.addTask(task1);
 
         taskManager.deleteTaskById(task1.getId());
         assertNull(taskManager.getTaskById(task1.getId()), "Задача не удаляется");
 
-        Task task2 = new Task("Test delete task", "Test delete task description", Instant.now(), 1);
-        Task task3 = new Task("Test delete task", "Test delete task description", Instant.now(), 1);
+        Task task2 = new Task("Test delete task", "Test delete task description",
+                now.plusSeconds(60), 1);
+        Task task3 = new Task("Test delete task", "Test delete task description",
+                now.plusSeconds(120), 1);
         taskManager.addTask(task2);
         taskManager.addTask(task3);
 
@@ -77,7 +86,21 @@ abstract class TaskManagerTest {
 
     @Test
     void getPrioritizedTask() {
-        Instant now = Instant.now();
+        Task task = new Task("task", "task", now, 1);
+        Subtask subtask = new Subtask("sub", "sub", now.plusSeconds(60), 1);
+        taskManager.addTask(task);
+        taskManager.addSubtask(subtask);
+
+        subtask.setStartTime(now.plusSeconds(120));
+        assertTrue(taskManager.updateSubtask(subtask), "Подзадача не обновляется после изменения времени");
+
+        List<Task> priorTasks = taskManager.getPrioritizedTasks();
+        assertNotNull(priorTasks, "Список с приоритетами не возвращается");
+        assertEquals(priorTasks, List.of(task, subtask), "Неверный приоритет в списке");
+    }
+
+    @Test
+    void tasksWithSameStartTimeException() {
         Task task = new Task("task", "task", now, 1);
         Subtask subtask = new Subtask("sub", "sub", now, 1);
         taskManager.addTask(task);
@@ -85,13 +108,6 @@ abstract class TaskManagerTest {
                 TasksWithSameStartTimeException.class,
                 () -> taskManager.addSubtask(subtask),
                 "Не выбрасывается исключение при одинаковом времени начала");
-
-        subtask.setStartTime(Instant.now());
-        assertTrue(taskManager.addSubtask(subtask), "Подзадача не добавляется после изменения времени");
-
-        List<Task> priorTasks = taskManager.getPrioritizedTasks();
-        assertNotNull(priorTasks, "Список с приоритетами не возвращается");
-        assertEquals(priorTasks, List.of(task, subtask), "Неверный приоритет в списке");
     }
     //******************************************************************************************************************
 
@@ -100,7 +116,7 @@ abstract class TaskManagerTest {
 
     @Test
     void addSubtask() {
-        Subtask subtask = new Subtask("Test subtask", "Test subtask description", Instant.now(), 1);
+        Subtask subtask = new Subtask("Test subtask", "Test subtask description", now, 1);
         taskManager.addSubtask(subtask);
         Epic epic = new Epic("Test epic for subtask", "Test epic for subtask description");
         epic.addSubtaskId(subtask.getId());
@@ -119,7 +135,7 @@ abstract class TaskManagerTest {
 
     @Test
     void updateSubtask() {
-        Subtask subtask = new Subtask("Test subtask", "Test subtask description", Instant.now(), 1);
+        Subtask subtask = new Subtask("Test subtask", "Test subtask description", now, 1);
         taskManager.addSubtask(subtask);
         Epic epic = new Epic("Test epic for subtask", "Test epic for subtask description");
         epic.addSubtaskId(subtask.getId());
@@ -131,7 +147,7 @@ abstract class TaskManagerTest {
                 "Test updated subtask description",
                 TaskStatus.IN_PROGRESS,
                 subtask.getEpicId(),
-                Instant.now(),
+                now.plusSeconds(60),
                 1);
         taskManager.updateTask(updatedSubtask);
 
@@ -148,7 +164,7 @@ abstract class TaskManagerTest {
 
     @Test
     void deleteSubtask() {
-        Subtask subtask1 = new Subtask("Test subtask1", "Test subtask1 description", Instant.now(), 1);
+        Subtask subtask1 = new Subtask("Test subtask1", "Test subtask1 description", now, 1);
         taskManager.addSubtask(subtask1);
         Epic epic = new Epic("Test epic for subtask1", "Test epic for subtask1 description");
         epic.addSubtaskId(subtask1.getId());
@@ -157,8 +173,10 @@ abstract class TaskManagerTest {
         taskManager.deleteSubtaskById(subtask1.getId());
         assertNull(taskManager.getSubtaskById(subtask1.getId()), "Подзадача не удаляется");
 
-        Subtask subtask2 = new Subtask("Test subtask2", "Test subtask2 description", Instant.now(), 1);
-        Subtask subtask3 = new Subtask("Test subtask3", "Test subtask3 description", Instant.now(), 1);
+        Subtask subtask2 = new Subtask("Test subtask2", "Test subtask2 description",
+                now.plusSeconds(60), 1);
+        Subtask subtask3 = new Subtask("Test subtask3", "Test subtask3 description",
+                now.plusSeconds(120), 1);
         taskManager.addSubtask(subtask2);
         taskManager.addSubtask(subtask3);
         epic.addSubtaskId(subtask2.getId());
@@ -175,7 +193,8 @@ abstract class TaskManagerTest {
     //Для корректного добавления эпика сначала необходимо добавить подзадачи в manager, потом их id в сам эпик
     @Test
     void addEpic() {
-        Subtask subtask = new Subtask("Test subtask for epic", "Test subtask for epic description", Instant.now(), 1);
+        Subtask subtask = new Subtask("Test subtask for epic", "Test subtask for epic description",
+                now, 1);
         taskManager.addSubtask(subtask);
         Epic epic = new Epic("Test epic", "Test epic");
         epic.addSubtaskId(subtask.getId());
@@ -194,7 +213,8 @@ abstract class TaskManagerTest {
 
     @Test
     void updateEpic() {
-        Subtask subtask = new Subtask("Test subtask for epic", "Test subtask for epic description", Instant.now(), 1);
+        Subtask subtask = new Subtask("Test subtask for epic", "Test subtask for epic description",
+                now, 1);
         taskManager.addSubtask(subtask);
         Epic epic = new Epic("Test epic", "Test epic");
         epic.addSubtaskId(subtask.getId());
@@ -221,7 +241,8 @@ abstract class TaskManagerTest {
 
     @Test
     void deleteEpic() {
-        Subtask subtask = new Subtask("Test subtask for epic", "Test subtask for epic description", Instant.now(), 1);
+        Subtask subtask = new Subtask("Test subtask for epic", "Test subtask for epic description",
+                now, 1);
         taskManager.addSubtask(subtask);
         Epic epic = new Epic("Test epic", "Test epic");
         epic.addSubtaskId(subtask.getId());
@@ -231,13 +252,15 @@ abstract class TaskManagerTest {
         assertNull(taskManager.getEpicById(epic.getId()), "Эпик не удаляется");
         assertNull(taskManager.getSubtaskById(subtask.getId()), "Подзадача эпика не удаляется");
 
-        Subtask subtask1 = new Subtask("Test subtask1 for epic1", "Test subtask1 for epic1 description", Instant.now(), 1);
+        Subtask subtask1 = new Subtask("Test subtask1 for epic1", "Test subtask1 for epic1 description",
+                now.plusSeconds(60), 1);
         taskManager.addSubtask(subtask1);
         Epic epic1 = new Epic("Test epic1", "Test epic1");
         epic1.addSubtaskId(subtask1.getId());
         taskManager.addEpic(epic1);
 
-        Subtask subtask2 = new Subtask("Test subtask2 for epic2", "Test subtask2 for epic2 description", Instant.now(), 1);
+        Subtask subtask2 = new Subtask("Test subtask2 for epic2", "Test subtask2 for epic2 description",
+                now.plusSeconds(120), 1);
         taskManager.addSubtask(subtask2);
         Epic epic2 = new Epic("Test epic2", "Test epic2");
         epic2.addSubtaskId(subtask2.getId());
@@ -252,7 +275,8 @@ abstract class TaskManagerTest {
 
     @Test
     void getEpicSubtasks() {
-        Subtask subtask = new Subtask("Test subtask for epic", "Test subtask for epic description", Instant.now(), 1);
+        Subtask subtask = new Subtask("Test subtask for epic", "Test subtask for epic description",
+                now, 1);
         taskManager.addSubtask(subtask);
         Epic epic = new Epic("Test epic", "Test epic");
         epic.addSubtaskId(subtask.getId());
@@ -274,8 +298,10 @@ abstract class TaskManagerTest {
     @Test
     void epicWithDifferentStatusSubtasks() {
         //все со статусом NEW
-        Subtask subtask1 = new Subtask("Test subtask1 for epic", "Test subtask1 for epic description", Instant.now(), 1);
-        Subtask subtask2 = new Subtask("Test subtask2 for epic", "Test subtask2 for epic description", Instant.now(), 1);
+        Subtask subtask1 = new Subtask("Test subtask1 for epic", "Test subtask1 for epic description",
+                now, 1);
+        Subtask subtask2 = new Subtask("Test subtask2 for epic", "Test subtask2 for epic description",
+                now.plusSeconds(60), 1);
         taskManager.addSubtask(subtask1);
         taskManager.addSubtask(subtask2);
 
@@ -293,7 +319,7 @@ abstract class TaskManagerTest {
                 "updated subtask description",
                 TaskStatus.DONE,
                 subtask1.getEpicId(),
-                Instant.now(),
+                now.plusSeconds(120),
                 1);
         taskManager.updateSubtask(doneSubtask1);
 
@@ -307,7 +333,7 @@ abstract class TaskManagerTest {
                 "updated subtask description",
                 TaskStatus.DONE,
                 subtask1.getEpicId(),
-                Instant.now(),
+                now.plusSeconds(180),
                 1);
         taskManager.updateSubtask(doneSubtask2);
 
@@ -321,7 +347,7 @@ abstract class TaskManagerTest {
                 "updated subtask description",
                 TaskStatus.IN_PROGRESS,
                 subtask1.getEpicId(),
-                Instant.now(),
+                now.plusSeconds(240),
                 1);
         taskManager.updateSubtask(inProgressSubtask1);
 
@@ -332,7 +358,7 @@ abstract class TaskManagerTest {
                 "updated subtask description",
                 TaskStatus.IN_PROGRESS,
                 subtask2.getEpicId(),
-                Instant.now(),
+                now.plusSeconds(300),
                 1);
         taskManager.updateSubtask(inProgressSubtask2);
 
@@ -352,9 +378,9 @@ abstract class TaskManagerTest {
 
         //Эпик с двумя подзадачами
         Subtask subtask1 = new Subtask("Test subtask1 for epic", "Test subtask1 for epic description",
-                Instant.now().plusSeconds(666), 1);
+                now, 1);
         Subtask subtask2 = new Subtask("Test subtask2 for epic", "Test subtask2 for epic description",
-                Instant.now(), 3);
+                now.plusSeconds(60), 3);
         taskManager.addSubtask(subtask1);
         taskManager.addSubtask(subtask2);
 
@@ -363,9 +389,9 @@ abstract class TaskManagerTest {
         taskManager.updateEpic(epicWith0Duration);
 
         Epic epicWith4Duration = taskManager.getEpicById(epicWith0Duration.getId());
-        assertEquals(epicWith4Duration.getStartTime(), subtask2.getStartTime(), "Неверное время начала");
+        assertEquals(epicWith4Duration.getStartTime(), subtask1.getStartTime(), "Неверное время начала");
         assertEquals(epicWith4Duration.getDuration(), 4, "Неверная продолжительность");
-        assertEquals(epicWith4Duration.getEndTime(), subtask2.getStartTime().plusSeconds(4*60L));
+        assertEquals(epicWith4Duration.getEndTime(), subtask1.getStartTime().plusSeconds(4*60L));
     }
     //******************************************************************************************************************
 }

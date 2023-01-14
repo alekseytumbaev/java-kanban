@@ -4,9 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasks.Epic;
 import tasks.Subtask;
+import tasks.Task;
 
 import java.io.File;
-import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -50,15 +50,22 @@ class FileBackedTaskManagerTest extends TaskManagerTest {
 
     @Test
     void testSavingAndLoading() {
-        Subtask fsub1 = new Subtask("подзача 1", "описание подзадачи 1", Instant.now(), 1);
-        Subtask fsub2 = new Subtask("подзача 2", "описание подзадачи 2", Instant.now(), 1);
-        taskManager.addSubtask(fsub1);
-        taskManager.addSubtask(fsub2);
+        Subtask sub1 = new Subtask("подзача 1", "описание подзадачи 1", now, 1);
+        Subtask sub2 = new Subtask("подзача 2", "описание подзадачи 2", now.plusSeconds(60), 1);
+        taskManager.addSubtask(sub1);
+        taskManager.addSubtask(sub2);
 
-        Epic fepic = new Epic("эпик", "описание эпика");
-        fepic.addSubtaskId(fsub1.getId());
-        fepic.addSubtaskId(fsub2.getId());
-        taskManager.addEpic(fepic);
+        Epic epic = new Epic("эпик", "описание эпика");
+        epic.addSubtaskId(sub1.getId());
+        epic.addSubtaskId(sub2.getId());
+        taskManager.addEpic(epic);
+
+        Task task = new Task("задача", "описание", now.plusSeconds(120), 1);
+        taskManager.addTask(task);
+
+        taskManager.getEpicById(epic.getId());
+        taskManager.getSubtaskById(sub1.getId());
+        taskManager.getTaskById(task.getId());
 
         FileBackedTaskManager fbm = Managers.loadFromFile(new File("tasks.csv"));
 
@@ -70,5 +77,9 @@ class FileBackedTaskManagerTest extends TaskManagerTest {
                 taskManager.getHistory(),
                 fbm.getHistory(),
                 "Не совпадают истории");
+        assertEquals(
+                taskManager.getPrioritizedTasks(),
+                fbm.getPrioritizedTasks(),
+                "Списки приоритетов не совпадают");
     }
 }
