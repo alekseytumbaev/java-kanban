@@ -24,6 +24,14 @@ public class Managers {
         return new InMemoryHistoryManager();
     }
 
+    public static FileBackedTaskManager loadFromFileOrGetNew(File file) {
+        try {
+            return loadFromFile(file);
+        } catch (ManagerLoadException e) {
+            return new FileBackedTaskManager();
+        }
+    }
+
     public static FileBackedTaskManager loadFromFile(File file) {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             br.readLine(); //пропускаем строку с заголовками
