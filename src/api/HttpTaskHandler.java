@@ -1,6 +1,6 @@
 package api;
 
-import api.processor.*;
+import api.task_request_processors.*;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import task_managers.Managers;
@@ -17,12 +17,16 @@ public class HttpTaskHandler implements HttpHandler {
     private final AbstractTasksRequestProcessor taskRequestProcessor;
     private final AbstractTasksRequestProcessor subtaskRequestProcessor;
     private final AbstractTasksRequestProcessor epicRequestProcessor;
+    private final AbstractTasksRequestProcessor historyRequestProcessor;
+    private final AbstractTasksRequestProcessor defaultRequestProcessor;
 
     public HttpTaskHandler() {
         TaskManager taskManager = Managers.loadFromFileOrGetNew(new File("tasks.csv"));
         taskRequestProcessor = new TaskRequestProcessor(taskManager);
         subtaskRequestProcessor = new SubtaskRequestProcessor(taskManager);
         epicRequestProcessor = new EpicRequestProcessor(taskManager);
+        historyRequestProcessor = new HistoryRequestProcessor(taskManager);
+        defaultRequestProcessor = new DefaultRequestProcessor(taskManager);
     }
 
     @Override
@@ -40,7 +44,7 @@ public class HttpTaskHandler implements HttpHandler {
         if (httpCode == 200)
             exchange.getResponseHeaders().set("Content-type", "application/json");
 
-        exchange.sendResponseHeaders(httpCode,0);
+        exchange.sendResponseHeaders(httpCode, 0);
 
         String responseBody = response.getBody();
         if (!responseBody.isEmpty()) {
@@ -53,21 +57,19 @@ public class HttpTaskHandler implements HttpHandler {
     }
 
     private Response processRequest(String method, String[] path, String query, String body) {
-        Response response;
+        if (path.length < 3)
+            return defaultRequestProcessor.process(method, path, query, body);
         switch (path[2]) {
             case "task":
-                response = taskRequestProcessor.process(method, path, query, body);
-                break;
+                return taskRequestProcessor.process(method, path, query, body);
             case "subtask":
-                response = subtaskRequestProcessor.process(method, path, query, body);
-                break;
+                return subtaskRequestProcessor.process(method, path, query, body);
             case "epic":
-                response = epicRequestProcessor.process(method,path,query, body);
-                break;
+                return epicRequestProcessor.process(method, path, query, body);
+            case "history":
+                return historyRequestProcessor.process(method, path, query, body);
             default:
-                response = new Response(400);
-                break;
+                return new Response(400);
         }
-        return response;
     }
 }

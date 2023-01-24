@@ -1,4 +1,4 @@
-package api.processor;
+package api.task_request_processors;
 
 import com.google.gson.Gson;
 import task_managers.TaskManager;
