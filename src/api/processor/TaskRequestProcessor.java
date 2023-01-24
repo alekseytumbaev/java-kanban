@@ -1,6 +1,5 @@
 package api.processor;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import exception.TasksWithSameStartTimeException;
 import task_managers.TaskManager;
@@ -9,16 +8,14 @@ import tasks.Task;
 import java.util.List;
 import java.util.Optional;
 
-public class TaskRequestProcessor {
-    private final TaskManager taskManager;
-    private final Gson gson;
+public class TaskRequestProcessor extends AbstractTasksRequestProcessor {
 
     public TaskRequestProcessor(TaskManager taskManager) {
-        this.taskManager = taskManager;
-        gson = new Gson();
+        super(taskManager);
     }
 
-    public Response process(String method, String query, String body) {
+    @Override
+    public Response process(String method, String[] path, String query, String body) {
         long id = 0;
         Optional<Long> idOpt;
         if (query != null) {
@@ -39,19 +36,6 @@ public class TaskRequestProcessor {
             default:
                 return new Response(501);
         }
-    }
-
-    private Optional<Long> checkIdQuery(String idQuery) {
-        idQuery = idQuery.replace("id=", "");
-        long idLong;
-        try {
-            idLong = Long.parseLong((idQuery));
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
-        if (idLong < 0) return Optional.empty();
-
-        return Optional.of(idLong);
     }
 
     private Response getTasks() {
@@ -93,5 +77,4 @@ public class TaskRequestProcessor {
         taskManager.deleteTaskById(id);
         return new Response(204);
     }
-
 }

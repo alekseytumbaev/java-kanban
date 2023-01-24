@@ -84,6 +84,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTaskById(long id) {
+        if (!tasks.containsKey(id)) return;
+
         prioritizedTasks.remove(tasks.get(id));
         tasks.remove(id);
         historyManager.remove(id);
@@ -127,7 +129,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public boolean updateSubtask(Subtask updatedSubtask) {
-        if (updatedSubtask == null) return false;
+        if (updatedSubtask == null || !subtasks.containsKey(updatedSubtask.getId())) return false;
 
         prioritizedTasks.remove(subtasks.get(updatedSubtask.getId()));
         addPrioritizedTask(updatedSubtask);
