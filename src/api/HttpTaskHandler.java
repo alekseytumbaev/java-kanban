@@ -6,7 +6,6 @@ import com.sun.net.httpserver.HttpHandler;
 import task_managers.Managers;
 import task_managers.TaskManager;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
@@ -21,7 +20,7 @@ public class HttpTaskHandler implements HttpHandler {
     private final AbstractTasksRequestProcessor defaultRequestProcessor;
 
     public HttpTaskHandler() {
-        TaskManager taskManager = Managers.loadFromFileOrGetNew(new File("tasks.csv"));
+        TaskManager taskManager = Managers.getDefault();
         taskRequestProcessor = new TaskRequestProcessor(taskManager);
         subtaskRequestProcessor = new SubtaskRequestProcessor(taskManager);
         epicRequestProcessor = new EpicRequestProcessor(taskManager);

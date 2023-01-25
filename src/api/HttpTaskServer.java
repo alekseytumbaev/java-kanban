@@ -18,4 +18,8 @@ public class HttpTaskServer {
         server.createContext("/tasks", new HttpTaskHandler());
         server.start();
     }
+
+    public void stop() {
+        server.stop(0);
+    }
 }

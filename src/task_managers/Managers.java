@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class Managers {
     public static TaskManager getDefault() {
-        return new InMemoryTaskManager();
+        return loadFromKVServer("http://localhost:8078", "key");
     }
 
     public static HistoryManager getHistoryDefault() {
@@ -37,14 +37,6 @@ public class Managers {
                 carrier.historyManager,
                 carrier.tasks, carrier.subtasks, carrier.epics,
                 client, key);
-    }
-
-    public static FileBackedTaskManager loadFromFileOrGetNew(File file) {
-        try {
-            return loadFromFile(file);
-        } catch (ManagerLoadException e) {
-            return new FileBackedTaskManager();
-        }
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
