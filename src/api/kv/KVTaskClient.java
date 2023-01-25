@@ -1,4 +1,4 @@
-package task_managers.http_task_manager.kv;
+package api.kv;
 
 import com.google.gson.Gson;
 

@@ -4,11 +4,14 @@ import constant.TaskStatus;
 import exception.ManagerLoadException;
 import task_managers.history_managers.HistoryManager;
 import task_managers.history_managers.InMemoryHistoryManager;
+import api.kv.KVTaskClient;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +27,18 @@ public class Managers {
         return new InMemoryHistoryManager();
     }
 
+    public static HttpTaskManager loadFromKVServer(String serverAddress, String key) {
+        KVTaskClient client = new KVTaskClient(serverAddress);
+        String taskManagerStr = client.load(key);
+        if (taskManagerStr == null) return new HttpTaskManager(client, key);
+
+        TaskManagerInfoCarrier carrier = deserialize(taskManagerStr);
+        return new HttpTaskManager(
+                carrier.historyManager,
+                carrier.tasks, carrier.subtasks, carrier.epics,
+                client, key);
+    }
+
     public static FileBackedTaskManager loadFromFileOrGetNew(File file) {
         try {
             return loadFromFile(file);
@@ -33,53 +48,67 @@ public class Managers {
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            br.readLine(); //пропускаем строку с заголовками
-
-            Map<Long, Task> tasks = new HashMap<>();
-            Map<Long, Epic> epics = new HashMap<>();
-            Map<Long, Subtask> subtasks = new HashMap<>();
-
-            String taskStr =  br.readLine();
-            while (!taskStr.isEmpty()) {
-                Task task = fromString(taskStr);
-                if (task instanceof Epic) {
-                    epics.put(task.getId(), (Epic) task);
-                } else if (task instanceof Subtask) {
-                    subtasks.put(task.getId(), (Subtask) task);
-                } else {
-                    tasks.put(task.getId(), task);
-                }
-                taskStr = br.readLine();
-            }
-
-            //добавляем id подзадач в соответсвующее эпики
-            for (Subtask sub : subtasks.values()) {
-                Epic epic = epics.get(sub.getEpicId());
-                epic.addSubtaskId(sub.getId());
-            }
-
-            //создаем historyManager из списка истории
-            List<Long> history = historyFromString(br.readLine());
-            HistoryManager historyManager = new InMemoryHistoryManager();
-            for (Long id : history) {
-                Task task;
-                if (tasks.containsKey(id)) {
-                    task = tasks.get(id);
-                } else if (epics.containsKey(id)) {
-                    task = epics.get(id);
-                } else if (subtasks.containsKey(id)) {
-                    task = subtasks.get(id);
-                } else {
-                    throw new ManagerLoadException("Повторяющиеся Id в файле");
-                }
-                historyManager.add(task);
-            }
-
-            return new FileBackedTaskManager(historyManager,tasks,subtasks,epics);
+        String content;
+        try {
+            content = new String(Files.readAllBytes(Paths.get(file.getPath())));
         } catch (IOException e) {
             throw new ManagerLoadException("Не удалось прочитать файл");
         }
+        TaskManagerInfoCarrier carrier = deserialize(content);
+        return new FileBackedTaskManager(
+                carrier.historyManager,
+                carrier.tasks,
+                carrier.subtasks,
+                carrier.epics);
+    }
+
+    private static TaskManagerInfoCarrier deserialize(String taskManager) {
+        String[] arr = taskManager.split(System.lineSeparator());
+
+        Map<Long, Task> tasks = new HashMap<>();
+        Map<Long, Epic> epics = new HashMap<>();
+        Map<Long, Subtask> subtasks = new HashMap<>();
+
+        int i = 1;
+        String taskStr = arr.length > i ? arr[i] : "";
+        while (!taskStr.isEmpty()) {
+            Task task = fromString(taskStr);
+            if (task instanceof Epic) {
+                epics.put(task.getId(), (Epic) task);
+            } else if (task instanceof Subtask) {
+                subtasks.put(task.getId(), (Subtask) task);
+            } else {
+                tasks.put(task.getId(), task);
+            }
+
+            i++;
+            taskStr = arr.length > i ? arr[i] : "";
+        }
+
+        //добавляем id подзадач в соответсвующее эпики
+        for (Subtask sub : subtasks.values()) {
+            Epic epic = epics.get(sub.getEpicId());
+            epic.addSubtaskId(sub.getId());
+        }
+
+        //создаем historyManager из списка истории
+        i++;
+        List<Long> history = historyFromString(arr.length > i ? arr[i] : "");
+        HistoryManager historyManager = new InMemoryHistoryManager();
+        for (Long id : history) {
+            Task task;
+            if (tasks.containsKey(id)) {
+                task = tasks.get(id);
+            } else if (epics.containsKey(id)) {
+                task = epics.get(id);
+            } else if (subtasks.containsKey(id)) {
+                task = subtasks.get(id);
+            } else {
+                throw new ManagerLoadException("Повторяющиеся Id в файле");
+            }
+            historyManager.add(task);
+        }
+        return new TaskManagerInfoCarrier(tasks,epics,subtasks,historyManager);
     }
 
     private static Task fromString(String value) {
@@ -107,7 +136,7 @@ public class Managers {
     }
 
     private static List<Long> historyFromString(String value) {
-        if (value == null) return new ArrayList<>();
+        if (value == null || value.isEmpty()) return new ArrayList<>();
 
         String[] split = value.split(",");
         List<Long> history = new ArrayList<>();
@@ -116,5 +145,20 @@ public class Managers {
             history.add(Long.valueOf(s));
         }
         return history;
+    }
+
+    private static class TaskManagerInfoCarrier {
+
+        public TaskManagerInfoCarrier(Map<Long, Task> tasks, Map<Long, Epic> epics, Map<Long, Subtask> subtasks, HistoryManager historyManager) {
+            this.tasks = tasks;
+            this.epics = epics;
+            this.subtasks = subtasks;
+            this.historyManager = historyManager;
+        }
+
+        Map<Long, Task> tasks;
+        Map<Long, Epic> epics;
+        Map<Long, Subtask> subtasks;
+        HistoryManager historyManager;
     }
 }

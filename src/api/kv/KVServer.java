@@ -1,4 +1,4 @@
-package task_managers.http_task_manager.kv;
+package api.kv;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -111,6 +111,10 @@ public class KVServer {
         System.out.println("Открой в браузере http://localhost:" + PORT + "/");
         System.out.println("API_TOKEN: " + apiToken);
         server.start();
+    }
+
+    public void stop() {
+        server.stop(0);
     }
 
     private String generateApiToken() {
