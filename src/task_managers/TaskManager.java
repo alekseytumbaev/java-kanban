@@ -10,6 +10,8 @@ public interface TaskManager {
 
     List<Task> getHistory();
 
+    long getCurrentId();
+
     //********************Tasks*****************************************************************************************
     List<Task> getAllTasks();
 

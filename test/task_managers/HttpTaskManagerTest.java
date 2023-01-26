@@ -82,6 +82,7 @@ class HttpTaskManagerTest extends TaskManagerTest {
 
         TaskManager httpm = Managers.loadFromKVServer("http://localhost:8078", "key");
 
+        assertEquals(taskManager.getCurrentId(), httpm.getCurrentId(), "Не совпадают id");
         assertEquals(
                 taskManager.getAllEpics(),
                 httpm.getAllEpics(),

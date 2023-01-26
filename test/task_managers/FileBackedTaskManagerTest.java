@@ -69,6 +69,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest {
 
         FileBackedTaskManager fbm = Managers.loadFromFile(new File("tasks.csv"));
 
+        assertEquals(taskManager.getCurrentId(), fbm.getCurrentId(), "Не совпадают id");
         assertEquals(
                 taskManager.getAllEpics(),
                 fbm.getAllEpics(),

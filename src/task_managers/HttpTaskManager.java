@@ -20,10 +20,11 @@ public class HttpTaskManager extends FileBackedTaskManager {
     }
 
     protected HttpTaskManager(
+            long currentId,
             HistoryManager historyManager,
             Map<Long, Task> tasks, Map<Long, Subtask> subtasks, Map<Long, Epic> epics,
             KVTaskClient client, String key) {
-        super(historyManager, tasks, subtasks, epics);
+        super(currentId, historyManager, tasks, subtasks, epics);
         this.client = client;
         this.key = key;
     }

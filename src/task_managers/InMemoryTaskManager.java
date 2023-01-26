@@ -26,9 +26,11 @@ public class InMemoryTaskManager implements TaskManager {
         this.prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
     }
 
-    protected InMemoryTaskManager(HistoryManager historyManager,
-                                  Map<Long, Task> tasks, Map<Long, Subtask> subtasks,
-                                  Map<Long, Epic> epics) {
+    protected InMemoryTaskManager(long currentId,
+                                  HistoryManager historyManager,
+                                  Map<Long, Task> tasks, Map<Long, Subtask> subtasks, Map<Long, Epic> epics) {
+
+        nextId = currentId;
         this.historyManager = historyManager;
         this.tasks = tasks;
         this.subtasks = subtasks;
@@ -40,6 +42,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     private long getNextId() {
         return nextId++;
+    }
+
+    @Override
+    public long getCurrentId() {
+        return nextId;
     }
 
     @Override

@@ -34,6 +34,7 @@ public class Managers {
 
         TaskManagerInfoCarrier carrier = deserialize(taskManagerStr);
         return new HttpTaskManager(
+                carrier.currentId,
                 carrier.historyManager,
                 carrier.tasks, carrier.subtasks, carrier.epics,
                 client, key);
@@ -48,6 +49,7 @@ public class Managers {
         }
         TaskManagerInfoCarrier carrier = deserialize(content);
         return new FileBackedTaskManager(
+                carrier.currentId,
                 carrier.historyManager,
                 carrier.tasks,
                 carrier.subtasks,
@@ -57,11 +59,12 @@ public class Managers {
     private static TaskManagerInfoCarrier deserialize(String taskManager) {
         String[] arr = taskManager.split(System.lineSeparator());
 
+        long currId = Long.parseLong(arr[0]);
         Map<Long, Task> tasks = new HashMap<>();
         Map<Long, Epic> epics = new HashMap<>();
         Map<Long, Subtask> subtasks = new HashMap<>();
 
-        int i = 1;
+        int i = 2;
         String taskStr = arr.length > i ? arr[i] : "";
         while (!taskStr.isEmpty()) {
             Task task = fromString(taskStr);
@@ -100,7 +103,7 @@ public class Managers {
             }
             historyManager.add(task);
         }
-        return new TaskManagerInfoCarrier(tasks,epics,subtasks,historyManager);
+        return new TaskManagerInfoCarrier(currId, tasks, epics, subtasks, historyManager);
     }
 
     private static Task fromString(String value) {
@@ -112,7 +115,7 @@ public class Managers {
         TaskStatus status = TaskStatus.valueOf(split[3]);
         String description = split[4];
         Instant startTime = split[5].equals("null") ? null : Instant.parse(split[5]);
-        int duration  = Integer.parseInt(split[6]);
+        int duration = Integer.parseInt(split[6]);
 
         Task task;
         if (type.equals(Subtask.class.getSimpleName().toUpperCase())) {
@@ -132,7 +135,7 @@ public class Managers {
 
         String[] split = value.split(",");
         List<Long> history = new ArrayList<>();
-        for (int i = split.length-1; i >= 0; i--) {
+        for (int i = split.length - 1; i >= 0; i--) {
             String s = split[i];
             history.add(Long.valueOf(s));
         }
@@ -141,13 +144,18 @@ public class Managers {
 
     private static class TaskManagerInfoCarrier {
 
-        public TaskManagerInfoCarrier(Map<Long, Task> tasks, Map<Long, Epic> epics, Map<Long, Subtask> subtasks, HistoryManager historyManager) {
+        public TaskManagerInfoCarrier(
+                long currentId,
+                Map<Long, Task> tasks, Map<Long, Epic> epics, Map<Long, Subtask> subtasks,
+                HistoryManager historyManager) {
+            this.currentId = currentId;
             this.tasks = tasks;
             this.epics = epics;
             this.subtasks = subtasks;
             this.historyManager = historyManager;
         }
 
+        long currentId;
         Map<Long, Task> tasks;
         Map<Long, Epic> epics;
         Map<Long, Subtask> subtasks;

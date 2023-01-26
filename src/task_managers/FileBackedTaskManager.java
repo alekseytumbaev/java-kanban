@@ -17,8 +17,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public FileBackedTaskManager() {
     }
 
-    protected FileBackedTaskManager(HistoryManager historyManager, Map<Long, Task> tasks, Map<Long, Subtask> subtasks, Map<Long, Epic> epics) {
-        super(historyManager, tasks, subtasks, epics);
+    protected FileBackedTaskManager(long currentId,
+                                    HistoryManager historyManager,
+                                    Map<Long, Task> tasks, Map<Long, Subtask> subtasks, Map<Long, Epic> epics) {
+        super(currentId, historyManager, tasks, subtasks, epics);
     }
 
     protected void save() {
@@ -32,6 +34,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     protected String serialize() {
         StringBuilder sb = new StringBuilder();
         String ls = System.lineSeparator();
+        sb.append(getCurrentId()).append(ls);
         sb.append("id,type,title,status,description,epic").append(ls);
 
         for (Task task : super.getAllTasks()) {
