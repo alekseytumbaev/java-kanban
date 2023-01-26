@@ -1,7 +1,10 @@
 package api.kv;
 
 import com.google.gson.Gson;
+import exception.ManagerSaveException;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -10,12 +13,15 @@ import java.net.http.HttpResponse;
 
 public class KVTaskClient {
 
+    private final StringBuilder logger;
+    private final String ls = System.lineSeparator();
     private final HttpClient client;
     private final String API_TOKEN;
     private final String serverAddress;
     private final Gson gson;
 
     public KVTaskClient(String serverAddress) {
+        logger = new StringBuilder();
         gson = new Gson();
         client = HttpClient.newHttpClient();
         this.serverAddress = serverAddress;
@@ -36,8 +42,9 @@ public class KVTaskClient {
         if (response.statusCode() == 200) {
             API_TOKEN = gson.fromJson(response.body(), String.class);
         } else {
-            System.out.println("Ошибка при регистрации клиента, код " + response.statusCode());
+            logger.append("Ошибка при регистрации клиента, код ").append(response.statusCode()).append(ls);
             API_TOKEN = "";
+            writeLogs();
         }
     }
 
@@ -56,7 +63,9 @@ public class KVTaskClient {
         }
 
         if (response.statusCode() != 200) {
-            System.out.println("Ошибка при save(), код  " + response.statusCode());
+            logger.append("Ошибка при save(), код  ").append(response.statusCode()).append(ls);
+            writeLogs();
+            
         }
     }
 
@@ -78,8 +87,18 @@ public class KVTaskClient {
         if (response.statusCode() == 200) {
             return response.body();
         } else {
-            System.out.println("Ошибка при load(), код " + response.statusCode());
+            logger.append("Ошибка при load(), код ").append(response.statusCode()).append(ls);
+            writeLogs();
             return null;
+        }
+        
+    }
+    
+    private void writeLogs() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("kvClientLogs.txt"))) {
+            bw.write(logger.toString());
+        } catch (IOException e) {
+            throw new ManagerSaveException("Не удалось сохранить лог kv сервера");
         }
     }
 }
