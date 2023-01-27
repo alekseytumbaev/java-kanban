@@ -2,6 +2,8 @@ package task_managers;
 
 import api.kv.KVServer;
 import api.kv.KVTaskClient;
+import constant.Endpoint;
+import constant.Port;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,13 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HttpTaskManagerTest extends TaskManagerTest {
 
+    private static final String URL = Endpoint.HOST.url + Port.KV_SERVER.port;
     private KVServer kvServer;
 
     @BeforeEach
     void beforeEach() throws IOException {
         kvServer = new KVServer();
         kvServer.start();
-        taskManager = new HttpTaskManager(new KVTaskClient("http://localhost:8078"), "key");
+        taskManager = new HttpTaskManager(new KVTaskClient(URL), "key");
     }
 
     @AfterEach
@@ -34,7 +37,7 @@ class HttpTaskManagerTest extends TaskManagerTest {
         Epic epic = new Epic("эпик", "описание эпика");
         taskManager.addEpic(epic);
 
-        TaskManager httpm = Managers.loadFromKVServer("http://localhost:8078", "key");
+        TaskManager httpm = Managers.loadFromKVServer(URL, "key");
         assertEquals(
                 taskManager.getEpicById(epic.getId()),
                 httpm.getEpicById(epic.getId()),
@@ -47,7 +50,7 @@ class HttpTaskManagerTest extends TaskManagerTest {
         taskManager.addEpic(epic);
         taskManager.deleteEpicById(epic.getId());
 
-        TaskManager httpm = Managers.loadFromKVServer("http://localhost:8078", "key");
+        TaskManager httpm = Managers.loadFromKVServer(URL, "key");
 
         assertEquals(taskManager.getAllTasks().size(), 0, "Список задач не пустой");
         assertEquals(taskManager.getHistory().size(), 0, "История не пустая");
@@ -80,7 +83,7 @@ class HttpTaskManagerTest extends TaskManagerTest {
         taskManager.getSubtaskById(sub1.getId());
         taskManager.getTaskById(task.getId());
 
-        TaskManager httpm = Managers.loadFromKVServer("http://localhost:8078", "key");
+        TaskManager httpm = Managers.loadFromKVServer(URL, "key");
 
         assertEquals(taskManager.getCurrentId(), httpm.getCurrentId(), "Не совпадают id");
         assertEquals(

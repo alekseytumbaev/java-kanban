@@ -1,5 +1,7 @@
 package api.task_request_processors;
 
+import constant.HttpCode;
+import constant.HttpMethod;
 import task_managers.TaskManager;
 import tasks.Task;
 
@@ -13,11 +15,11 @@ public class DefaultRequestProcessor extends AbstractTasksRequestProcessor{
 
     @Override
     public Response process(String method, String[] path, String query, String body) {
-        if (method.equals("GET")) {
+        if (method.equals(HttpMethod.GET.toString())) {
             List<Task> prioritized = taskManager.getPrioritizedTasks();
-            return new Response(200, gson.toJson(prioritized));
+            return new Response(HttpCode.OK, gson.toJson(prioritized));
         }
 
-        return new Response(501);
+        return new Response(HttpCode.NOT_IMPLEMENTED);
     }
 }

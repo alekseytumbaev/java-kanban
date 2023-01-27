@@ -1,12 +1,15 @@
 package api.task_request_processors;
 
 import com.google.gson.JsonSyntaxException;
+import constant.HttpMethod;
 import exception.TasksWithSameStartTimeException;
 import task_managers.TaskManager;
 import tasks.Epic;
 
 import java.util.List;
 import java.util.Optional;
+
+import static constant.HttpCode.*;
 
 public class EpicRequestProcessor extends AbstractTasksRequestProcessor {
 
@@ -21,33 +24,39 @@ public class EpicRequestProcessor extends AbstractTasksRequestProcessor {
         Optional<Long> idOpt;
         if (query != null) {
             idOpt = checkIdQuery(query);
-            if (idOpt.isEmpty()) return new Response(400);
+            if (idOpt.isEmpty()) return new Response(BAD_REQUEST);
             id = idOpt.get();
         }
 
-        switch (method) {
-            case "GET":
+        HttpMethod httpMethod;
+        try {
+            httpMethod = HttpMethod.valueOf(method);
+        } catch (IllegalArgumentException e) {
+            return new Response(NOT_IMPLEMENTED);
+        }
+        switch (httpMethod) {
+            case GET:
                 if (query == null) return getEpics();
                 else return getEpicById(id);
-            case "POST":
+            case POST:
                 return addEpic(body);
-            case "DELETE":
+            case DELETE:
                 if (query == null) return deleteAllEpics();
                 else return deleteEpicById(id);
             default:
-                return new Response(501);
+                return new Response(NOT_IMPLEMENTED);
         }
     }
 
     private Response getEpics() {
         List<Epic> epics = taskManager.getAllEpics();
-        return new Response(200, gson.toJson(epics));
+        return new Response(OK, gson.toJson(epics));
     }
 
     private Response getEpicById(long id) {
         Epic epic = taskManager.getEpicById(id);
-        if (epic == null) return new Response(404);
-        return new Response(200, gson.toJson(epic));
+        if (epic == null) return new Response(NOT_FOUND);
+        return new Response(OK, gson.toJson(epic));
     }
 
     private Response addEpic(String body) {
@@ -55,27 +64,27 @@ public class EpicRequestProcessor extends AbstractTasksRequestProcessor {
         try {
             epic = gson.fromJson(body, Epic.class);
         } catch (JsonSyntaxException e) {
-            return new Response(400);
+            return new Response(BAD_REQUEST);
         }
 
         try {
             if (taskManager.updateEpic(epic) || taskManager.addEpic(epic)) {
-                return new Response(200, gson.toJson(epic));
+                return new Response(OK, gson.toJson(epic));
             }
         } catch (TasksWithSameStartTimeException e) {
-            return new Response(400);
+            return new Response(BAD_REQUEST);
         }
 
-        return new Response(400);
+        return new Response(BAD_REQUEST);
     }
 
     private Response deleteAllEpics() {
         taskManager.deleteAllEpics();
-        return new Response(204);
+        return new Response(NO_CONTENT);
     }
 
     private Response deleteEpicById(long id) {
         taskManager.deleteEpicById(id);
-        return new Response(204);
+        return new Response(NO_CONTENT);
     }
 }

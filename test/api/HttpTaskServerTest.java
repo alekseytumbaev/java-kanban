@@ -21,14 +21,17 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import static constant.Endpoint.*;
+import static constant.HttpCode.*;
+import static constant.Port.TASK_SERVER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HttpTaskServerTest {
 
-    static final String URL = "http://localhost:8080/tasks/";
-    static final String subURL = URL + "subtask/";
-    static final String taskURL = URL + "task/";
-    static final String epicURL = URL + "epic/";
+    static final String URL = HOST.url + TASK_SERVER.port + MAIN.url;
+    static final String subURL = URL + SUBTASK.url;
+    static final String taskURL = URL + TASK.url;
+    static final String epicURL = URL + EPIC.url;
 
     static HttpClient client;
     static Gson gson;
@@ -63,34 +66,34 @@ class HttpTaskServerTest {
 
         //POST
         HttpResponse<String> postResp = sendPost(taskStr1, taskURL);
-        assertEquals(200, postResp.statusCode(), "Неверный код ответа при POST");
+        assertEquals(OK.code, postResp.statusCode(), "Неверный код ответа при POST");
         Task addedTask = gson.fromJson(postResp.body(), Task.class);
         task1.setId(addedTask.getId());
         assertEquals(task1, addedTask, "Задачи при POST-запросе не совпадают");
 
         //GET by id
         HttpResponse<String> getByIdResp = sendGet(taskURL + "?id=" + task1.getId());
-        assertEquals(200, getByIdResp.statusCode(), "Неверный код ответа при GET by id");
+        assertEquals(OK.code, getByIdResp.statusCode(), "Неверный код ответа при GET by id");
         assertEquals(task1, gson.fromJson(getByIdResp.body(), Task.class), "Задачи при GET-запросе по id не совпадают");
 
         //GET
         HttpResponse<String> getResp = sendGet(taskURL);
-        assertEquals(200, getResp.statusCode(), "Неверный код ответа при GET all");
+        assertEquals(OK.code, getResp.statusCode(), "Неверный код ответа при GET all");
         Type type = new TypeToken<ArrayList<Task>>() {}.getType();
         assertEquals(List.of(task1), gson.fromJson(getResp.body(), type), "Задачи при GET-запросе не совпадают");
 
         //DELETE by id
         HttpResponse<String> deleteByIdResp = sendDelete(taskURL + "?id=" + task1.getId());
-        assertEquals(204, deleteByIdResp.statusCode(), "Неверный код ответа при DELETE by id");
+        assertEquals(NO_CONTENT.code, deleteByIdResp.statusCode(), "Неверный код ответа при DELETE by id");
         HttpResponse<String> getRespAfterDel = sendGet(taskURL + "?id=" + task1.getId());
-        assertEquals(404, getRespAfterDel.statusCode(),
+        assertEquals(NOT_FOUND.code, getRespAfterDel.statusCode(),
                 "Задача при DELETE-запросе по id не удаляется");
 
         //DELETE
         String taskStr2 = gson.toJson(new Task("task2", "desc", now, 2));
         sendPost(taskStr2, taskURL);
         HttpResponse<String> deleteResp = sendDelete(taskURL);
-        assertEquals(204, deleteResp.statusCode(), "Неверный код ответа при DELETE");
+        assertEquals(NO_CONTENT.code, deleteResp.statusCode(), "Неверный код ответа при DELETE");
         HttpResponse<String> getRespAfterDelAll = sendGet(taskURL);
         assertEquals(new ArrayList<Task>(), gson.fromJson(getRespAfterDelAll.body(), type),
                 "Не все задачи удалены");
@@ -106,7 +109,7 @@ class HttpTaskServerTest {
         //Для корректного добавления подзадачи необходимо:
         //1) Добавить подзадачу в менеджер, чтобы он назначил ей id
         HttpResponse<String> postResp = sendPost(subStr1, subURL);
-        assertEquals(200, postResp.statusCode(), "Неверный код ответа при добавлении подзадачи POST-запросом");
+        assertEquals(OK.code, postResp.statusCode(), "Неверный код ответа при добавлении подзадачи POST-запросом");
 
         //2) Добавить id подзадачи в эпик
         Subtask tmpSub = gson.fromJson(postResp.body(), Subtask.class);
@@ -114,40 +117,40 @@ class HttpTaskServerTest {
 
         //3) Добавить эпик
         HttpResponse<String> postAddEpicResp = sendPost(gson.toJson(epic), epicURL);
-        assertEquals(200, postAddEpicResp.statusCode(),
+        assertEquals(OK.code, postAddEpicResp.statusCode(),
                 "Неверный код ответа при добавлении эпика с подзадачей POST-запросом");
 
         //GET by id
         HttpResponse<String> getByIdResp = sendGet(subURL + "?id=" + tmpSub.getId());
-        assertEquals(200, getByIdResp.statusCode(), "Неверный код ответа при GET by id");
+        assertEquals(OK.code, getByIdResp.statusCode(), "Неверный код ответа при GET by id");
         Subtask addedSub = gson.fromJson(getByIdResp.body(), Subtask.class);
         tmpSub.setEpicId(addedSub.getEpicId());
         assertEquals(tmpSub, addedSub, "Подзадачи при GET-запросе не совпадают");
 
         //GET by epicId
-        HttpResponse<String> getByEpicIdResp = sendGet(subURL + "epic/?id=" + addedSub.getEpicId());
-        assertEquals(200, getByEpicIdResp.statusCode(), "Неверный код ответа при GET by epicId");
+        HttpResponse<String> getByEpicIdResp = sendGet(subURL + EPIC.url.substring(1) + "?id=" + addedSub.getEpicId());
+        assertEquals(OK.code, getByEpicIdResp.statusCode(), "Неверный код ответа при GET by epicId");
         Type type = new TypeToken<ArrayList<Subtask>>() {}.getType();
         assertEquals(List.of(addedSub), gson.fromJson(getByEpicIdResp.body(), type),
                 "Подзадачи при GET by epicId не совпадают");
 
         //GET
         HttpResponse<String> getResp = sendGet(subURL);
-        assertEquals(200, getResp.statusCode(), "Неверный код ответа при GET all");
+        assertEquals(OK.code, getResp.statusCode(), "Неверный код ответа при GET all");
         assertEquals(List.of(addedSub), gson.fromJson(getResp.body(), type), "Подзадачи при GET all не совпадают");
 
         //DELETE by id
         HttpResponse<String> deleteByIdResp = sendDelete(subURL + "?id=" + addedSub.getId());
-        assertEquals(204, deleteByIdResp.statusCode(), "Неверный код ответа при DELETE by id");
+        assertEquals(NO_CONTENT.code, deleteByIdResp.statusCode(), "Неверный код ответа при DELETE by id");
         HttpResponse<String> getRespAfterDel = sendGet(subURL + "?id=" + addedSub.getId());
-        assertEquals(404, getRespAfterDel.statusCode(),
+        assertEquals(NOT_FOUND.code, getRespAfterDel.statusCode(),
                 "Подзадача при DELETE-запросе по id не удаляется");
 
         //DELETE
         String subStr2 = gson.toJson(new Subtask("sub", "desc", now, 2));
         sendPost(subStr2, subURL);
         HttpResponse<String> deleteResp = sendDelete(subURL);
-        assertEquals(204, deleteResp.statusCode(), "Неверный код ответа при DELETE");
+        assertEquals(NO_CONTENT.code, deleteResp.statusCode(), "Неверный код ответа при DELETE");
         HttpResponse<String> getRespAfterDelAll = sendGet(subURL);
         assertEquals(new ArrayList<Subtask>(), gson.fromJson(getRespAfterDelAll.body(), type),
                 "Не все подзадачи удалены");
@@ -165,7 +168,7 @@ class HttpTaskServerTest {
 
         //POST
         HttpResponse<String> postEpic1Resp = sendPost(gson.toJson(epic1), epicURL);
-        assertEquals(200, postEpic1Resp.statusCode(),
+        assertEquals(OK.code, postEpic1Resp.statusCode(),
                 "Неверный код ответа при добавлении перового эпика с подзадачей POST-запросом");
         Epic addedEpic1 = gson.fromJson(postEpic1Resp.body(), Epic.class);
         addedSub1.setEpicId(addedEpic1.getId());
@@ -174,26 +177,26 @@ class HttpTaskServerTest {
 
         //GET by id
         HttpResponse<String> getByIdResp = sendGet(epicURL + "?id=" + addedEpic1.getId());
-        assertEquals(200, postEpic1Resp.statusCode(),
+        assertEquals(OK.code, postEpic1Resp.statusCode(),
                 "Неверный код ответа при получении эпика с подзадачей GET-запросом по id");
         assertEquals(addedEpic1, gson.fromJson(getByIdResp.body(), Epic.class),
                 "Добавленный и полученный эпик не совпадают");
 
         //GET
         HttpResponse<String> getResp = sendGet(epicURL);
-        assertEquals(200, getResp.statusCode(), "Неверный код ответа при GET all");
+        assertEquals(OK.code, getResp.statusCode(), "Неверный код ответа при GET all");
         Type type = new TypeToken<ArrayList<Epic>>() {}.getType();
         assertEquals(List.of(addedEpic1), gson.fromJson(getResp.body(), type), "Эпики при GET all не совпадают");
 
         //DELETE by id
         HttpResponse<String> deleteByIdResp = sendDelete(epicURL + "?id=" + epic1.getId());
-        assertEquals(204, deleteByIdResp.statusCode(), "Неверный код ответа при DELETE by id");
+        assertEquals(NO_CONTENT.code, deleteByIdResp.statusCode(), "Неверный код ответа при DELETE by id");
         HttpResponse<String> getRespAfterDel = sendGet(epicURL + "?id=" + epic1.getId());
-        assertEquals(404, getRespAfterDel.statusCode(),
+        assertEquals(NOT_FOUND.code, getRespAfterDel.statusCode(),
                 "Эпик при DELETE-запросе по id не удаляется");
 
         HttpResponse<String> getSubRespAfterDel = sendGet(subURL + "?id=" + addedSub1.getId());
-        assertEquals(404, getSubRespAfterDel.statusCode(),
+        assertEquals(NOT_FOUND.code, getSubRespAfterDel.statusCode(),
                 "Подзадача эпика при DELETE-запросе по id не удаляется");
 
         //DELETE
@@ -210,7 +213,7 @@ class HttpTaskServerTest {
         addedSub2.setEpicId(addedEpic2.getId());
 
         HttpResponse<String> deleteEpicResp = sendDelete(epicURL);
-        assertEquals(204, deleteEpicResp.statusCode(), "Неверный статус при удалении эпиков");
+        assertEquals(NO_CONTENT.code, deleteEpicResp.statusCode(), "Неверный статус при удалении эпиков");
         HttpResponse<String> getEpicsAfterDel = sendGet(epicURL);
         assertEquals(new ArrayList<Epic>(), gson.fromJson(getEpicsAfterDel.body(), type),
                 "Не все эпики удалены");
@@ -238,14 +241,14 @@ class HttpTaskServerTest {
 
         //History
         HttpResponse<String> historyResp = sendGet(URL + "history");
-        assertEquals(200, historyResp.statusCode(), "Неверный код при получении истории");
+        assertEquals(OK.code, historyResp.statusCode(), "Неверный код при получении истории");
         Type type = new TypeToken<ArrayList<Task>>() {}.getType();
         List<Task> history = gson.fromJson(historyResp.body(), type);
-        assertEquals(List.of(added2, added1), history);
+        assertEquals(List.of(added1, added2), history);
 
         //Prioritized
         HttpResponse<String> getPriorResp = sendGet(URL);
-        assertEquals(200, getPriorResp.statusCode(), "Неверный код при получении приоритетных задач");
+        assertEquals(OK.code, getPriorResp.statusCode(), "Неверный код при получении приоритетных задач");
         List<Task> prioritized = gson.fromJson(getPriorResp.body(), type);
         assertEquals(List.of(added1, added2), prioritized);
     }

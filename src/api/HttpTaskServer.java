@@ -1,9 +1,12 @@
 package api;
 
 import com.sun.net.httpserver.HttpServer;
+import constant.Endpoint;
+import constant.Port;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+
 
 public class HttpTaskServer {
 
@@ -11,11 +14,11 @@ public class HttpTaskServer {
 
     public HttpTaskServer() {
         try {
-            server = HttpServer.create(new InetSocketAddress(8080), 0);
+            server = HttpServer.create(new InetSocketAddress(Port.TASK_SERVER.port), 0);
         } catch (IOException e) {
             throw new RuntimeException("Не удалось создать сервер: " + e.getMessage());
         }
-        server.createContext("/tasks", new HttpTaskHandler());
+        server.createContext(Endpoint.MAIN.url, new HttpTaskHandler());
         server.start();
     }
 

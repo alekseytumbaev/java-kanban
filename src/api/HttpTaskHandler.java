@@ -3,6 +3,7 @@ package api;
 import api.task_request_processors.*;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import constant.HttpCode;
 import task_managers.Managers;
 import task_managers.TaskManager;
 
@@ -10,6 +11,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+
+import static constant.HttpCode.BAD_REQUEST;
+import static constant.HttpCode.OK;
 
 public class HttpTaskHandler implements HttpHandler {
 
@@ -39,11 +43,11 @@ public class HttpTaskHandler implements HttpHandler {
 
         Response response = processRequest(method, path, query, body);
 
-        int httpCode = response.getHttpCode();
-        if (httpCode == 200)
+        HttpCode httpCode = response.getHttpCode();
+        if (httpCode.equals(OK))
             exchange.getResponseHeaders().set("Content-type", "application/json");
 
-        exchange.sendResponseHeaders(httpCode, 0);
+        exchange.sendResponseHeaders(httpCode.code, 0);
 
         String responseBody = response.getBody();
         if (!responseBody.isEmpty()) {
@@ -68,7 +72,7 @@ public class HttpTaskHandler implements HttpHandler {
             case "history":
                 return historyRequestProcessor.process(method, path, query, body);
             default:
-                return new Response(400);
+                return new Response(BAD_REQUEST);
         }
     }
 }

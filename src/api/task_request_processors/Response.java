@@ -1,21 +1,23 @@
 package api.task_request_processors;
 
+import constant.HttpCode;
+
 public class Response {
 
-    private final int httpCode;
+    private final HttpCode httpCode;
     private final String body;
 
-    public Response(int httpCode, String body) {
+    public Response(HttpCode httpCode, String body) {
         this.httpCode = httpCode;
         this.body = body;
     }
 
-    public Response(int httpCode) {
+    public Response(HttpCode httpCode) {
         this.httpCode = httpCode;
         body = "";
     }
 
-    public int getHttpCode() {
+    public HttpCode getHttpCode() {
         return httpCode;
     }
 

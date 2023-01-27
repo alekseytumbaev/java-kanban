@@ -11,6 +11,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import static constant.Endpoint.*;
+import static constant.HttpCode.OK;
+
 public class KVTaskClient {
 
     private final StringBuilder logger;
@@ -26,7 +29,7 @@ public class KVTaskClient {
         client = HttpClient.newHttpClient();
         this.serverAddress = serverAddress;
 
-        URI uri = URI.create(serverAddress + "/register");
+        URI uri = URI.create(serverAddress + REGISTER.url);
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(uri)
@@ -39,7 +42,7 @@ public class KVTaskClient {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-        if (response.statusCode() == 200) {
+        if (response.statusCode() == OK.code) {
             API_TOKEN = gson.fromJson(response.body(), String.class);
         } else {
             logger.append("Ошибка при регистрации клиента, код ").append(response.statusCode()).append(ls);
@@ -49,7 +52,7 @@ public class KVTaskClient {
     }
 
     public void put(String key, String json) {
-        URI uri = URI.create(serverAddress + "/save/" + key + "?API_TOKEN=" + API_TOKEN);
+        URI uri = URI.create(serverAddress + SAVE.url + "/" + key + "?API_TOKEN=" + API_TOKEN);
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .uri(uri)
@@ -62,7 +65,7 @@ public class KVTaskClient {
             throw new RuntimeException(e);
         }
 
-        if (response.statusCode() != 200) {
+        if (response.statusCode() != OK.code) {
             logger.append("Ошибка при save(), код  ").append(response.statusCode()).append(ls);
             writeLogs();
             
@@ -70,7 +73,7 @@ public class KVTaskClient {
     }
 
     public String load(String key) {
-        URI uri = URI.create(serverAddress + "/load/" + key + "?API_TOKEN=" + API_TOKEN);
+        URI uri = URI.create(serverAddress + LOAD.url + "/" + key + "?API_TOKEN=" + API_TOKEN);
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(uri)
@@ -84,7 +87,7 @@ public class KVTaskClient {
             throw new RuntimeException(e);
         }
 
-        if (response.statusCode() == 200) {
+        if (response.statusCode() == OK.code) {
             return response.body();
         } else {
             logger.append("Ошибка при load(), код ").append(response.statusCode()).append(ls);

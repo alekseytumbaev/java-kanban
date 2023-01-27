@@ -1,5 +1,7 @@
 package task_managers;
 
+import constant.Endpoint;
+import constant.Port;
 import constant.TaskStatus;
 import exception.ManagerLoadException;
 import task_managers.history_managers.HistoryManager;
@@ -20,7 +22,7 @@ import java.util.Map;
 
 public class Managers {
     public static TaskManager getDefault() {
-        return loadFromKVServer("http://localhost:8078", "key");
+        return loadFromKVServer(Endpoint.HOST.url + Port.KV_SERVER.port, "key");
     }
 
     public static HistoryManager getHistoryDefault() {
